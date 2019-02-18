@@ -86,7 +86,7 @@ Shader "Example/Diffuse Simple"
 
 Properties
 {
-	// _VariableName ("Name that shows in inspector", Type) = default value
+	// Syntax: _VariableName ("Name that shows in inspector", Type) = default value
 	_RangedFloat ("Ranged Float", Range (min, max)) = number
 	_Float ("Float", Float) = number
 	_Int ("Int", Int) = number
@@ -100,7 +100,7 @@ Properties
 	// Unity's builtin shaders use _MainTex ss the main diffuse/albedo slot,
 	// so it is advised to use this 
 	_MainTex ("Main Tex", 2D) = "white" {}
-	_ ("Main Tex", 2D) = "white" {}
+	_BumpMap ("Bumpmap", 2D) = "bump" {}
 
 	// Attiributes:
 	[HideInInspector]
@@ -116,11 +116,14 @@ half _Float;
 fixed _Float;
 float _Float;
 
-int _Int; // uint for unsigned
-uint _Int; // TODO: Check if viable ??
+int _Int;
+uint _Int;
 
+// half, fixed, float + 2,3,4 are all possible combinations for example:
 fixed4 _Color; // low precision type is usually enough for colors
 float4 _Vector;
+
+float4x4 _Matrix;
 
 sampler2D _Texture;
 samplerCUBE _Cubemap;
@@ -128,6 +131,12 @@ sampler3D _3DTexture;
 
 // Tiling and Offset information can be obtain by [TEXTURE NAME]_ST, that needs to be defined separately
 float4 _Texture_ST; // (x = x tiling, y = y tiling, z = x offset, w = y offset)
+
+// Texture size can be obtained through the Vector4 [TEXTURE NAME]_TexelSize
+float4 _Texture_TexelSize; // x = 1.0/width, y = 1.0/height, z = width, w = height
+
+// Never personally used, see in official docs:
+float4 _Texture_HDR
 
 // #TAGS
 
