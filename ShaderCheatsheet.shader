@@ -101,6 +101,14 @@ Properties
 	// so it is advised to use this 
 	_MainTex ("Main Tex", 2D) = "white" {}
 	_ ("Main Tex", 2D) = "white" {}
+
+	// Attiributes:
+	[HideInInspector]
+	[NoScaleOffset] // no texture tiling/offset fields in inspector
+	[Normal] // expects a normal map and adds a "Fix Now" button to convert
+	[HDR] // expects an HDR
+	[Gamma] // indicates that a float/vector property is specified as sRGB value in the UI (just like colors are), and possibly needs conversion according to color space used
+	[PerRendererData] // indicates that a texture property will be coming from per-renderer data in the form of a MaterialPropertyBlock. Material inspector changes the texture slot UI for these properties.
 }
 
 // They would be accessed in HSLS code as:
