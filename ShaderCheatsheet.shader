@@ -9,7 +9,7 @@
 
 // - Or - I will never learn how to write shaders by heart
 
-// I wrote all text preceeding with // so that shader highlighting can be used in your favourite software (like sublime)
+// I wrote all text preceeding with // so that shader highlighting can be used in a text editor (like sublime)
 
 // All categories mentioned in comments for searching are written in caps, for example "see MY TITLE"
 // To navigate to a category, like MY TITLE find it with hashtag like "#MY TITLE"
@@ -18,13 +18,11 @@
 
 // #VERT/FRAG shader
 
-// Every "See.." Has a category below
-
 Shader "Custom/Name"
 {
-	Properties
+	Properties // See PROPERTIES
 	{
-		// See PROPERTIES
+		
 	}
 
 	Tags // See TAGS
@@ -40,12 +38,14 @@ Shader "Custom/Name"
 		#pragma fragment frag
 
 		// custom variables
+
+		struct appdata { }; // not necessary if using one of predefined ones, see #APPDATA
+
+		struct v2f { }; // see #STRUCTS
 	
-		struct v2f {  };
+		v2f vert (appdata v) { };
 	
-		v2f vert () { };
-	
-		fixed4 frag (v2f i) : SV_Target {};
+		fixed4 frag (v2f i) : SV_Target { };
 	
 		ENDCG
 	}
@@ -86,18 +86,21 @@ Shader "Example/Diffuse Simple"
 
 Properties
 {
+	// _VariableName ("Name that shows in inspector", Type) = default value
 	_RangedFloat ("Ranged Float", Range (min, max)) = number
 	_Float ("Float", Float) = number
 	_Int ("Int", Int) = number
 	_Color ("Some Color", Color) = (1,1,1,1)
 	_Vector ("Some Vector", Vector) = (0,0,0,0)
-	_Texture ("Texture", 2D) = "white" {}
+	_Texture ("Texture", 2D) = "white" {} // "", “white” (1,1,1,1), “black” (0,0,0,0), “gray” (0.5,0.5,0.5,0.5), “bump” (0.5,0.5,1,0.5) or “red” (1,0,0,0)
 	_Cubemap ("Cubemap", CUBE) = "" {}
 	_3DTexture ("3DTexture", 3D) = "defaulttexture" {}
 
 	// Standard properties:
+	// Unity's builtin shaders use _MainTex ss the main diffuse/albedo slot,
+	// so it is advised to use this 
 	_MainTex ("Main Tex", 2D) = "white" {}
-	// Missing - color, normal map
+	_ ("Main Tex", 2D) = "white" {}
 }
 
 // They would be accessed in HSLS code as:
@@ -115,7 +118,7 @@ sampler2D _Texture;
 samplerCUBE _Cubemap;
 sampler3D _3DTexture;
 
-// Tiling and Offset information can be obtain by [TEXTURE NAME]_ST
+// Tiling and Offset information can be obtain by [TEXTURE NAME]_ST, that needs to be defined separately
 float4 _Texture_ST; // (x = x tiling, y = y tiling, z = x offset, w = y offset)
 
 // #TAGS
