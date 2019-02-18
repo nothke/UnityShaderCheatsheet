@@ -482,6 +482,72 @@ fixed4 frag (v2f i) : SV_Target {
 	return col;
 }
 
+
+//-----------------------------------
+//-- #GPU INSTANCING - #INSTANCING --
+//-----------------------------------
+
+#pragma multi_compile_instancing
+
+#include "UnityCG.cginc"
+
+struct appdata_t {
+	...
+	UNITY_VERTEX_INPUT_INSTANCE_ID
+};
+
+// It seems that this block required even tho you don't have any per instance properties
+UNITY_INSTANCING_BUFFER_START(Props)
+UNITY_DEFINE_INSTANCED_PROP(fixed4, _Color) // Make _Color an instanced property (i.e. an array)
+#define _Color_arr Props
+UNITY_INSTANCING_BUFFER_END(Props)
+
+v2f vert (appdata_t v)
+{
+	v2f o;
+	UNITY_SETUP_INSTANCE_ID(v);
+	...
+	return o;
+}
+
+//-------------------------------
+//-- #VR - #STEREO SINGLE PASS --
+//-------------------------------
+
+// To support stereo single pass you need to put these macros to pass the eye index to the fragment shader.
+// For example, if you’re using any of the view or projection matrices or the camera position in the fragment shader
+// these need the eye index to give the correct value, otherwise you’ll always access the left eye.
+
+#include "UnityCG.cginc"
+
+struct appdata_t {
+	...
+	UNITY_VERTEX_INPUT_INSTANCE_ID
+}
+
+struct v2f {
+	...
+	UNITY_VERTEX_OUTPUT_STEREO
+}
+
+v2f vert (appdata_t v)
+{
+	v2f o;
+	UNITY_SETUP_INSTANCE_ID(); // for single pass instanced. Not necessary?
+	UNITY_INITIALIZE_OUTPUT(v2f, o); // for single pass instanced. Not necessary?
+	UNITY_INITIALIZE_VERTEX_OUTPUT_STEREO(o);
+	...
+	return o;
+}
+
+// in frag shader, eye can be accessed with
+UNITY_SETUP_STEREO_EYE_INDEX_POST_VERTEX(i)
+// but it is not necessary, unless you are writing a post shader for example
+
+
+
+
+
 // SAMPLE
 
 Pass
