@@ -135,16 +135,22 @@ float4 _Texture_ST; // (x = x tiling, y = y tiling, z = x offset, w = y offset)
 // Texture size can be obtained through the Vector4 [TEXTURE NAME]_TexelSize
 float4 _Texture_TexelSize; // x = 1.0/width, y = 1.0/height, z = width, w = height
 
-// Never personally used, see in official docs:
+// Never personally used, see in official docs
 float4 _Texture_HDR
 
 // #TAGS
 
 Tags { 
-	"Queue"="Transparent" 
-	"RenderType"="Transparent" 
-	"IgnoreProjector"="True" 
-	// TODO
+	"Queue" = "Background" | "Geometry" | "AlphaTest" | "Transparent" | "Overlay"
+	// special cases with +number, e.g. "Geometry+1"
+	"RenderType" = "Transparent" | "TransparentCutout" | "Background" | "Overlay"
+					| "TreeOpaque" | "TreeTransparentCutout" | "TreeBillboard" | "Grass" | "GrassBillboard"
+	"IgnoreProjector" = "True" 
+	"DisableBatching" = "True" | "False" | "LODFading"
+	"ForceNoShadowCasting" = "True"
+	"IgnoreProjector" = "True"
+	"CanUseSpriteAtlas" = "False" // if the shader is meant for sprites, and will not work when they are packed into atlases
+	"PreviewType" = "Sphere" | "Plane" | "Skybox" // how should the inspector preview the material, Plane is 2D
 }
 
 // incomplete
@@ -160,9 +166,9 @@ Blend OneMinusDstColor One // Soft Additive
 Blend DstColor Zero // Multiplicative
 Blend DstColor SrcColor // 2x Multiplicative
 
-BlendOp colorOp
+BlendOp colorOp // provide a custom operation
 BlendOp colorOp, alphaOp
-AlphaToMask On | Off
+AlphaToMask On | Off // aka Alpha to coverage, allows MSAA to be used on pixels of an alpha test shader
 
 // #Culling & Z
 
@@ -566,9 +572,11 @@ UNITY_SETUP_STEREO_EYE_INDEX_POST_VERTEX(i)
 
 
 
+//-------------------------------
+//-- #SHADOW CASTING ------------
+//-------------------------------
 
-
-// SAMPLE
+// incomplete, not tested
 
 Pass
 {
