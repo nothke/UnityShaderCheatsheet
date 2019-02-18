@@ -1,15 +1,495 @@
+
+
+███████╗██╗  ██╗ █████╗ ██████╗ ███████╗██████╗     ██╗  ██╗███████╗██╗     ██████╗ ██╗
+██╔════╝██║  ██║██╔══██╗██╔══██╗██╔════╝██╔══██╗    ██║  ██║██╔════╝██║     ██╔══██╗██║
+███████╗███████║███████║██║  ██║█████╗  ██████╔╝    ███████║█████╗  ██║     ██████╔╝██║
+╚════██║██╔══██║██╔══██║██║  ██║██╔══╝  ██╔══██╗    ██╔══██║██╔══╝  ██║     ██╔═══╝ ╚═╝
+███████║██║  ██║██║  ██║██████╔╝███████╗██║  ██║    ██║  ██║███████╗███████╗██║     ██╗
+╚══════╝╚═╝  ╚═╝╚═╝  ╚═╝╚═════╝ ╚══════╝╚═╝  ╚═╝    ╚═╝  ╚═╝╚══════╝╚══════╝╚═╝     ╚═╝
+
+// - Or - I will never learn how to write shaders by heart
+
+// I wrote all text preceeding with // so that shader highlighting can be used in your favourite software (like sublime)
+
+// All categories mentioned in comments for searching are written in caps, for example "see MY TITLE"
+// To navigate to a category, like MY TITLE find it with hashtag like "#MY TITLE"
+
+// #STRUCTURE
+
+// #VERT/FRAG shader
+
+// Every "See.." Has a category below
+
+Shader "Custom/Name"
+{
+	Properties
+	{
+		// See PROPERTIES
+	}
+
+	Tags // See TAGS
+	Blend // See BLEND MODES
+
+	Pass
+	{
+		CGPROGRAM
+
+		#include // See INCLUDES
+
+		#pragma vertex vert // See PRAGMAS
+		#pragma fragment frag
+
+		// custom variables
+	
+		struct v2f {  };
+	
+		v2f vert () { };
+	
+		fixed4 frag (v2f i) : SV_Target {};
+	
+		ENDCG
+	}
+
+	Pass // Another pass...
+	{
+
+	}
+}
+
+// #SURFACE SHADER
+
+Shader "Example/Diffuse Simple" 
+{
+	// Properties, same as above
+
+    SubShader // Note, SubShader instead of Pass
+    {
+    	Tags // see tags. Note, tags inside the SubShader {} unlike vert/frag shaders
+
+    	CGPROGRAM
+    	#pragma surface surf Lambert
+    	
+    	struct Input {
+    	    float4 color : COLOR;
+    	};
+
+    	void surf (Input IN, inout SurfaceOutput o) {
+    	    o.Albedo = 1;
+    	}
+
+    	ENDCG
+    }
+    Fallback "Diffuse"
+  }
+
+// #PROPERTIES
+
+Properties
+{
+	_RangedFloat ("Ranged Float", Range (min, max)) = number
+	_Float ("Float", Float) = number
+	_Int ("Int", Int) = number
+	_Color ("Some Color", Color) = (1,1,1,1)
+	_Vector ("Some Vector", Vector) = (0,0,0,0)
+	_Texture ("Texture", 2D) = "white" {}
+	_Cubemap ("Cubemap", CUBE) = "" {}
+	_3DTexture ("3DTexture", 3D) = "defaulttexture" {}
+
+	// Standard properties:
+	_MainTex ("Main Tex", 2D) = "white" {}
+	// Missing - color, normal map
+}
+
+// They would be accessed in HSLS code as:
+half _Float;
+fixed _Float;
+float _Float;
+
+int _Int; // uint for unsigned
+uint _Int; // TODO: Check if viable ??
+
+fixed4 _Color; // low precision type is usually enough for colors
+float4 _Vector;
+
+sampler2D _Texture;
+samplerCUBE _Cubemap;
+sampler3D _3DTexture;
+
+// Tiling and Offset information can be obtain by [TEXTURE NAME]_ST
+float4 _Texture_ST; // (x = x tiling, y = y tiling, z = x offset, w = y offset)
+
+// #TAGS
+
+Tags { 
+	"Queue"="Transparent" 
+	"RenderType"="Transparent" 
+	"IgnoreProjector"="True" 
+	// TODO
+}
+
+// incomplete
+
+// #BLEND MODES
+
+Blend Off
+
+Blend SrcAlpha OneMinusSrcAlpha // Traditional transparency
+Blend One OneMinusSrcAlpha // Premultiplied transparency
+Blend One One // Additive
+Blend OneMinusDstColor One // Soft Additive
+Blend DstColor Zero // Multiplicative
+Blend DstColor SrcColor // 2x Multiplicative
+
+BlendOp colorOp
+BlendOp colorOp, alphaOp
+AlphaToMask On | Off
+
+// #Culling & Z
+
+Cull Back | Front | Off
+ZWrite On | Off
+ZTest Less | Greater | LEqual | GEqual | Equal | NotEqual | Always
+Offset Factor, Units
+Name "PassName" // Name a pass so that it can be reused by calling UsePass from other shaders
+ColorMask RGB | A | 0 | any combination of R, G, B, A // used to select which channel to use with blending
+
+// #PRAGMAS ==
+
+// Pragmas are compilation directives
+// They written inside the CGPROGRAM ENDCG block
+#pragma vertex name // function that acts on every mesh vertex
+#pragma fragment name // function that acts on every visible pixel
+#pragma geometry name // DX10 geometry shader function. Acts per triangle. Turns on #pragma target 4.0
+// Used for tessellation:
+#pragma hull name // DX11 hull shader function. Acts once per patch. Turns on #pragma target 5.0
+#pragma domain name // DX11 domain shader function. Turns on #pragma target 5.0
+
+// #VERTEX STRUCTS
+
+// built-in shortcut appdatas:
+appdata_base // position, normal and one texture coordinate.
+appdata_tan // position, tangent, normal and one texture coordinate.
+appdata_full // position, tangent, normal, four texture coordinates and color.
+appdata_img // vertex shader input with position and one texture coordinate.
+
+// or custom struct like:
+struct appdata {
+	// built in types:
+    float4 vertex : POSITION;
+    float3 normal : NORMAL;
+    float4 tangent : TANGENT;
+    fixed4 color : COLOR;
+
+    float4 texcoord : TEXCOORD0; // or some people write "uv"
+	float3 mycustomthing : TEXCOORD1; // for other custom things use TEXCOORD-number
+};
+
+// this is what appdata_full has:
+struct appdata_full {
+    float4 vertex : POSITION;
+    float4 tangent : TANGENT;
+    float3 normal : NORMAL;
+    float4 texcoord : TEXCOORD0;
+    float4 texcoord1 : TEXCOORD1;
+    fixed4 color : COLOR;
+#if defined(SHADER_API_XBOX360)
+    half4 texcoord2 : TEXCOORD2;
+    half4 texcoord3 : TEXCOORD3;
+    half4 texcoord4 : TEXCOORD4;
+    half4 texcoord5 : TEXCOORD5;
+#endif
+};
+
+// #STRUCTS
+// #VERTEX TO FRAGMENT STRUCT
+
+// COLOR0, COLOR2.. etc is used for low precision 0-1 values
+// TEXCOORD0, TEXCOORD1.. etc is used for high precision
+// ^ this only matters on older, dx9 hardware
+
+// Note: COLOR is the same as COLOR0, the same goes for TEXCOORD and TEXCOORD0 (TODO: check if true)
+
+struct v2f {
+    float4 pos : SV_POSITION;
+    fixed4 color : COLOR; // this didn't neeed to be COLOR (see above)
+
+    float4 uv : TEXCOORD0;
+    float3 normal : TEXCOORD1;
+
+    uint vid : SV_VertexID // vertex ID, needs to be uint, requires #pragma target 3.5
+}; // NOTE THE SEMICOLON HERE AFTER STRUCT!
+
+// #VERTEX SHADER
+
+// If you only need position, you can return just a float4 in clip space
+float4 vert (float4 vertex : POSITION) : SV_POSITION
+{
+    return UnityObjectToClipPos(vertex);
+}
+
+// if you have more data, you need to return a custom structure (see VERTEX TO FRAGMENT STRUCT)
+
+// The values output from the vertex shader will be interpolated across the face of the rendered triangles,
+// and the values at each pixel will be passed as inputs to the fragment shader.
+
+v2f vert (appdata_base v)
+{
+    v2f o;
+    o.pos = UnityObjectToClipPos(v.vertex); // clip pos, NOT object position
+    // uv
+    o.uv = float4( v.texcoord.xy, 0, 0 );
+    // vertex color
+    o.color = v.color;
+
+    // VIEW (camera) - camera view
+    o.viewDir = normalize(WorldSpaceViewDir(v.vertex));
+    return o;
+} // NO SEMICOLON AFTER FUNCTIONS!
+
+o.vertex = mul(UNITY_MATRIX_MVP, v.vertex);
+vs
+o.vertex = UnityObjectToClipPos(v.vertex);
+?
+
+
+
+// #FRAGMENT SHADER
+
+// usually, you would use : SV_Target semantic, like:
+fixed4 frag (v2f i) : SV_Target
+{
+	return i.color // to visualize vertex color for eg.
+}
+
+// ---------
+
+// but you can also return custom structure if you need additional colors (as in multiple render targets):
+struct fragOutput
+{
+	fixed4 color : SV_Target;
+	fixed4 color2 : SV_Target0; // for additional render targets .. add as many SV_TargetN as you need
+	fixed4 depth : SV_Depth; // overrides the z buffer value. Note on some GPUs it turns off depth buffer optimizations
+};
+
+fragOutput frag (v2f i)
+{
+	fragOutput o;
+	o.color = fixed4(i.uv, 0, 0);
+	o.color2 = i.color;
+	o.depth = 0;
+	return o;
+}
+
+// ---------
+
+// You can use VPOS to obtain screen space vertex position in pixels
+// requires #pragma target 3.0
+fixed4 frag (v2f i, UNITY_VPOS_TYPE screenPos : VPOS) : SV_Target
+{
+	return fixed4(screenPos.xy, 0, 0); // X Y is in pixels!
+}
+
+// You can use VFACE to obtain face facing
+// VFACE input positive for frontbaces,negative for backfaces
+// requires #pragma target 3.0
+fixed4 frag (fixed facing : VFACE) : SV_Target
+{
+    return facing > 0 ? _ColorFront : _ColorBack;
+}
+
+// ---------
+
+// #BUILT-IN FUNCTIONS
+
+// #INCLUDES
+
+#include HLSLSupport.cginc // (automatically included) Helper macros and definitions for cross-platform shader compilation.
+#include UnityShaderVariables.cginc // (automatically included) Commonly used global variables.
+
+#include UnityCG.cginc // commonly used helper functions.
+#include AutoLight.cginc // lighting & shadowing functionality, e.g. surface shaders use this file internally.
+#include Lighting.cginc // standard surface shader lighting models; automatically included when you’re writing surface shaders.
+#include TerrainEngine.cginc // helper functions for Terrain & Vegetation shaders.
+
+// Vertex transformation functions in UnityCG.cginc
+float4 UnityObjectToClipPos(float3 pos)	// Transforms a point from object space to the camera’s clip space in homogeneous coordinates. This is the equivalent of mul(UNITY_MATRIX_MVP, float4(pos, 1.0)), and should be used in its place.
+float3 UnityObjectToViewPos(float3 pos)	// Transforms a point from object space to view space. This is the equivalent of mul(UNITY_MATRIX_MV, float4(pos, 1.0)).xyz, and should be used in its place.
+
+// Generic helper functions in UnityCG.cginc
+float3 WorldSpaceViewDir (float4 v)	// Returns world space direction (not normalized) from given object space vertex position towards the camera.
+float3 ObjSpaceViewDir (float4 v)	// Returns object space direction (not normalized) from given object space vertex position towards the camera.
+float2 ParallaxOffset (half h, half height, half3 viewDir)	// calculates UV offset for parallax normal mapping.
+fixed Luminance (fixed3 c)	// Converts color to luminance (grayscale).
+fixed3 DecodeLightmap (fixed4 color)	// Decodes color from Unity lightmap (RGBM or dLDR depending on platform).
+float4 EncodeFloatRGBA (float v)	// Encodes [0..1) range float into RGBA color, for storage in low precision render target.
+float DecodeFloatRGBA (float4 enc)	// Decodes RGBA color into a float.
+float2 EncodeFloatRG (float v)	// Encodes [0..1) range float into a float2.
+float DecodeFloatRG (float2 enc)	// Decodes a previously-encoded RG float.
+float2 EncodeViewNormalStereo (float3 n)	// Encodes view space normal into two numbers in 0..1 range.
+float3 DecodeViewNormalStereo (float4 enc4)	// Decodes view space normal from enc4.xy.
+
+// Only in forward rendering
+float3 WorldSpaceLightDir (float4 v)	//Computes world space direction (not normalized) to light, given object space vertex position.
+float3 ObjSpaceLightDir (float4 v)	//Computes object space direction (not normalized) to light, given object space vertex position.
+float3 Shade4PointLights (...)	//Computes illumination from four point lights, with light data tightly packed into vectors. Forward rendering uses this to compute per-vertex lighting
+
+// Screen-space helper functions in UnityCG.cginc
+float4 ComputeScreenPos (float4 clipPos)	// Computes texture coordinate for doing a screenspace-mapped texture sample. Input is clip space position. The function takes care of platform differences in render texture coordinates.
+float4 ComputeGrabScreenPos (float4 clipPos)	//Computes texture coordinate for sampling a GrabPass texure. Input is clip space position. The function takes care of platform differences in render texture coordinates.
+float3 ShadeVertexLights (float4 vertex, float3 normal)	// Computes illumination from four per-vertex lights and ambient, given object space position & normal.
+
+UnityObjectToWorldNormal(normal); // To convert normals to world space
+
+tex2D(_Tex, float2); // Texture sampling
+
+// #BUILT-IN VARIABLES
+
+// #Transformations
+// TODOL CHeck if these still work
+UNITY_MATRIX_MVP	// Current model * view * projection matrix.
+UNITY_MATRIX_MV	// Current model * view matrix.
+UNITY_MATRIX_V	// Current view matrix.
+UNITY_MATRIX_P	// Current projection matrix.
+UNITY_MATRIX_VP	// Current view * projection matrix.
+UNITY_MATRIX_T_MV	// Transpose of model * view matrix.
+UNITY_MATRIX_IT_MV	// Inverse transpose of model * view matrix.
+
+unity_WorldToObject // Inverse of current world matrix. _World2Object is obsolete
+unity_ObjectToWorld // Current model matrix. _Object2World is obsolete
+
+// To get UVs
+newUV = TRANSFORM_TEX(oldUV, _MainTex); // replace with the name of your texture
+// also remember to declare the float4 _MainTex_ST; variable before using the macro
+
+// #Camera & Screen
+_WorldSpaceCameraPos	// float3	World space position of the camera.
+_ProjectionParams	// float4	x is 1.0 (or –1.0 if currently rendering with a flipped projection matrix), y is the camera’s near plane, z is the camera’s far plane and w is 1/FarPlane.
+_ScreenParams	// float4	x is the camera’s render target width in pixels, y is the camera’s render target height in pixels, z is 1.0 + 1.0/width and w is 1.0 + 1.0/height.
+_ZBufferParams	// float4	Used to linearize Z buffer values. x is (1-far/near), y is (far/near), z is (x/far) and w is (y/far).
+unity_OrthoParams	// float4	x is orthographic camera’s width, y is orthographic camera’s height, z is unused and w is 1.0 when camera is orthographic, 0.0 when perspective.
+unity_CameraProjection	// float4x4	Camera’s projection matrix.
+unity_CameraInvProjection	// float4x4	Inverse of camera’s projection matrix.
+unity_CameraWorldClipPlanes[6]	// float4	Camera frustum plane world space equations, in this order: left, right, bottom, top, near, far.
+
+// #Time
+_Time	// float4	Time since level load (t/20, t, t*2, t*3), use to animate things inside the shaders.
+_SinTime	// float4	Sine of time: (t/8, t/4, t/2, t).
+_CosTime	// float4	Cosine of time: (t/8, t/4, t/2, t).
+unity_DeltaTime	// float4	Delta time: (dt, 1/dt, smoothDt, 1/smoothDt).
+
+// #Lights
+_LightColor0 // (declared in Lighting.cginc)	fixed4	Light color
+_WorldSpaceLightPos0	// float4	Directional lights: (world space direction, 0). Other lights: (world space position, 1).
+_LightMatrix0 // (declared in AutoLight.cginc)	float4x4	World-to-light matrix. Used to sample cookie & attenuation textures.
+// forward only:
+unity_4LightPosX0, unity_4LightPosY0, unity_4LightPosZ0	// float4	(ForwardBase pass only) world space positions of first four non-important point lights.
+unity_4LightAtten0	// float4	(ForwardBase pass only) attenuation factors of first four non-important point lights.
+unity_LightColor	// half4[4]	(ForwardBase pass only) colors of of first four non-important point lights.
+// deffered:
+_LightColor	//float4	Light color.
+_LightMatrix0	//float4x4	World-to-light matrix. Used to sample cookie & attenuation textures.
+// vertex lit:
+unity_LightColor	// half4[8]	Light colors.
+unity_LightPosition	// float4[8]	View-space light positions. (-direction,0) for directional lights; (position,1) for point/spot lights.
+unity_LightAtten	// half4[8]	Light attenuation factors. x is cos(spotAngle/2) or –1 for non-spot lights; y is 1/cos(spotAngle/4) or 1 for non-spot lights; z is quadratic attenuation; w is squared light range.
+unity_SpotDirection	// float4[8]	View-space spot light positions; (0,0,1,0) for non-spot lights.
+
+// #Ambient
+unity_AmbientSky	// fixed4	Sky ambient lighting color in gradient ambient lighting case.
+unity_AmbientEquator	// fixed4	Equator ambient lighting color in gradient ambient lighting case.
+unity_AmbientGround	// fixed4	Ground ambient lighting color in gradient ambient lighting case.
+
+// #Fog
+// UNITY_LIGHTMODEL_AMBIENT	// fixed4	Ambient lighting color (sky color in gradient ambient case). Legacy variable.
+unity_FogColor	// fixed4	Fog color.
+unity_FogParams	// float4	Parameters for fog calculation: (density / sqrt(ln(2)), density / ln(2), –1/(end-start), end/(end-start)). x is useful for Exp2 fog mode, y for Exp mode, z and w for Linear mode.
+
+// #LOD
+unity_LODFade	// float4	Level-of-detail fade when using LODGroup. x is fade (0..1), y is fade quantized to 16 levels, z and w unused.
+
+// IN SURFACE SHADERS:
+IN.worldNormal
+IN.viewDir
+
+
+// TODO: Add HSLS functions
+
+
+
+// TODO:
+== SURFACE SHADER CUSTOM LIGHTING ==
+
+
+
+
+// DUMP
+
+
+
+		Pass
+		{
+			Tags{ "LightMode" = "ShadowCaster" }
+
+			Fog{ Mode Off }
+			ZWrite On ZTest Less Cull Off
+			Offset 1, 1
+
+			CGPROGRAM
+			
+				#pragma vertex vert
+				#pragma fragment frag
+				#pragma multi_compile_shadowcaster
+				#pragma fragmentoption ARB_precision_hint_fastest
+				
+				#include "UnityCG.cginc"
+
+				struct v2f
+				{
+					V2F_SHADOW_CASTER;
+				};
+
+				v2f vert(appdata_base v)
+				{
+					v2f o;
+					TRANSFER_SHADOW_CASTER_NORMALOFFSET(o)
+					return o;
+				}
+
+				float4 frag(v2f i) : COLOR
+				{
+					SHADOW_CASTER_FRAGMENT(i)
+				}
+
+			ENDCG
+		}
+
 //Shader again:
 
-// == ALPHA TEST TRANSPARENCY (aka cutoff, cutout)
+//------------------
+//-- TRANSPARENCY --
+//------------------
+
+// #ALPHA TEST TRANSPARENCY == // (aka #CUTOFF, #CUTOUT)
 
 // To make a thing transparent:
 // Make sure you use have these 2 tags:
 Tags {
 	"Queue" = "AlphaTest" 
 	"RenderType" = "TransparentCutout"
-	}
+}
 
 // In frag shader add:
 clip(col.a - 0.5); // this 0.5 is the cutoff value, you can put it in a variable or property
 
-// == ALPHA BLEND TRANSPARENCY
+// #ALPHA BLEND TRANSPARENCY
+
+Tags { 
+	"Queue"="Transparent" 
+	"RenderType"="Transparent"
+}
+
+// Use one of the Blend modes see BLEND MODES
+Blend SrcAlpha OneMinusSrcAlpha
+ColorMask RGB
+ZWrite Off
+//Cull Off // optional
