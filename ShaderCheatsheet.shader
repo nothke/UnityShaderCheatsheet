@@ -8,11 +8,15 @@
 ╚══════╝╚═╝  ╚═╝╚═╝  ╚═╝╚═════╝ ╚══════╝╚═╝  ╚═╝    ╚═╝  ╚═╝╚══════╝╚══════╝╚═╝     ╚═╝
 
 // - Or - I will never learn how to write shaders by heart
+// by Nothke, contact: nothke@gmail.com or https://twitter.com/Nothke
 
-// I wrote all text preceeding with // so that shader highlighting can be used in a text editor (like sublime)
+// All comments are written preceeding with // so that shader highlighting can be used in a text editor (like sublime)
 
 // All categories mentioned in comments for searching are written in caps, for example "see MY TITLE"
 // To navigate to a category, like MY TITLE find it with hashtag like "#MY TITLE"
+
+// This cheatsheet primarily focuses on VERTEX/FRAMGENT shaders and not on SURFACE shaders,
+// but some of the surface shader things are mentioned in a separate category on the bottom. see SURFACE
 
 // #STRUCTURE
 
@@ -56,31 +60,7 @@ Shader "Custom/Name"
 	}
 }
 
-// #SURFACE SHADER
 
-Shader "Example/Diffuse Simple" 
-{
-	// Properties, same as above
-
-    SubShader // Note, SubShader instead of Pass
-    {
-    	Tags // see tags. Note, tags inside the SubShader {} unlike vert/frag shaders
-
-    	CGPROGRAM
-    	#pragma surface surf Lambert
-    	
-    	struct Input {
-    	    float4 color : COLOR;
-    	};
-
-    	void surf (Input IN, inout SurfaceOutput o) {
-    	    o.Albedo = 1;
-    	}
-
-    	ENDCG
-    }
-    Fallback "Diffuse"
-  }
 
 // #PROPERTIES
 
@@ -433,19 +413,7 @@ unity_FogParams	// float4	Parameters for fog calculation: (density / sqrt(ln(2))
 // #LOD
 unity_LODFade	// float4	Level-of-detail fade when using LODGroup. x is fade (0..1), y is fade quantized to 16 levels, z and w unused.
 
-// IN SURFACE SHADERS:
-IN.worldNormal
-IN.viewDir
 
-
-// TODO: Add HSLS functions
-
-
-
-// TODO:
-== SURFACE SHADER CUSTOM LIGHTING ==
-
-//Shader again:
 
 //-------------------
 //-- #TRANSPARENCY --
@@ -614,3 +582,44 @@ Pass
 
 	ENDCG
 }
+
+
+
+//-----------------------------------------------//
+//-----------------------------------------------//
+//----------   SURFACE     SHADERS   ------------//
+//-----------------------------------------------//
+//-----------------------------------------------//
+
+// #SURFACE SHADERS
+
+Shader "Example/Diffuse Simple" 
+{
+	Properties // See PROPERTIES
+	{
+		
+	}
+
+    SubShader // Note, SubShader, unlike "Pass" in vert/frag shaders
+    {
+    	Tags // see tags. Note, tags inside the SubShader {} unlike vert/frag shaders
+
+    	CGPROGRAM
+    	#pragma surface surf Lambert
+    	
+    	struct Input {
+    	    float4 color : COLOR;
+    	};
+
+    	void surf (Input IN, inout SurfaceOutput o) {
+    	    o.Albedo = 1;
+    	}
+
+    	ENDCG
+    }
+    Fallback "Diffuse"
+  }
+
+//
+IN.worldNormal
+IN.viewDir
