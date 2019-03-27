@@ -184,6 +184,11 @@ ColorMask RGB | A | 0 | any combination of R, G, B, A // used to select which ch
 // Used for tessellation:
 #pragma hull name // DX11 hull shader function. Acts once per patch. Turns on #pragma target 5.0
 #pragma domain name // DX11 domain shader function. Turns on #pragma target 5.0
+// Shader keywords:
+#pragma multi_compile KEYWORD1 KEYWORD2 // enables multiple shader variants, see MULTI_COMPILE
+#pragma skip_variants KEYWORD2 KEYWORD3 // skips compiling variants that you are sure are not used in the project
+#pragma hardware_tier_variants renderer // automatically creates 3 variants: UNITY_HARDWARE_TIER1, UNITY_HARDWARE_TIER2 and UNITY_HARDWARE_TIER3
+#pragma shader_feature KEYWORD // similar to multi_compile but unused variants will not be included in the build
 
 // #VERTEX STRUCTS
 
