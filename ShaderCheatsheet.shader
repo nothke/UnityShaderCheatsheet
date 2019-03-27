@@ -66,7 +66,7 @@ Shader "Custom/Name"
 
 Properties
 {
-	// Syntax: _VariableName ("Name that shows in inspector", Type) = default value
+	// Syntax: _VariableName ("Label in the inspector", Type) = default value
 	_RangedFloat ("Ranged Float", Range (min, max)) = number
 	_Float ("Float", Float) = number
 	_Int ("Int", Int) = number
@@ -89,6 +89,21 @@ Properties
 	[HDR] // expects an HDR
 	[Gamma] // indicates that a float/vector property is specified as sRGB value in the UI (just like colors are), and possibly needs conversion according to color space used
 	[PerRendererData] // indicates that a texture property will be coming from per-renderer data in the form of a MaterialPropertyBlock. Material inspector changes the texture slot UI for these properties.
+
+	// Sliders
+	[PowerSlider(3.0)] _Shininess ("Shininess", Range (0.01, 1)) = 0.08 // A slider with "power of" (in this case ^3) response curve
+	[IntRange] _Alpha ("Alpha", Range (0, 255)) = 100 // integer slider for specified range (0 to 255)
+
+	// Decorators
+	[Space(50)] _Prop2 ("Prop2", Float) = 0 // creates space before property
+	[Header(A group of things)] _Prop1 ("Prop1", Float) = 0 // creates a header before property
+
+	[Enum(UnityEngine.Rendering.BlendMode)] _Blend ("Blend mode", Float) = 1 // blend mode popup menu
+	[Enum(One,1,SrcAlpha,5)] _Blend2 ("Blend mode subset", Float) = 1 // a subset of blend mode values, just "One" (value 1) and "SrcAlpha" (value 5)
+
+	// multi_compile Shader Keywords
+	[Toggle(THINGY)] _Fancy ("Thingy", Float) = 0 // toggles a THINGY multi_compile shader keyword, see #MULTI_COMPILE
+	[KeywordEnum(None, Add, Multiply)] _Overlay ("Overlay mode", Float) = 0
 }
 
 // They would be accessed in HSLS code as:
@@ -538,7 +553,43 @@ v2f vert (appdata_t v)
 UNITY_SETUP_STEREO_EYE_INDEX_POST_VERTEX(i)
 // but it is not necessary, unless you are writing a post shader for example
 
+//---------------------------------------------------
+//-- #MULTI_COMPILE #SHADER KEYWORDS #KEYWORDS ------
+//---------------------------------------------------
 
+// using multi_compile directives enables making multiple shader variants #pragma multi_compile VARIANT_1 VARIANT_2 etc..
+
+//-------------
+// 2 VARIANTS
+
+// with 2 variants, using __ will assume the "off" variant, you can write it like:
+#pragma multi_compile __ THINGY
+
+// use in code as:
+#if defined(THINGY)
+	// do something when enabled
+#else
+	// do something when disabled
+#endif
+
+// to create a property that will toggle it:
+[Toggle(THINGY)] _Thingy("Thingy", Float) = 0 // the name of the property (_Thingy in this case) doesn't seem to be relevant
+
+// or you can toggle from code using Shader.EnableKeyword/DisableKeyword or Material.EnableKeyword/DisableKeyword
+
+//--------------------
+// MULTIPLE VARIANTS
+
+#pragma multi_compile _SOMETHING_THIS _SOMETHING_ELSE _SOMETHING_OTHERWISE
+
+// use similar to the above:
+#if defined(_SOMETHING_THIS)
+	// do something only when SOMETHING_1 is defined
+#endif
+
+// Auto-property for more than 2 variants.
+// Each name will enable "property name" + underscore + "enum name", uppercased, shader keyword. Up to 9 names can be provided.
+[KeywordEnum(This, Else, Otherwise)] _Something("Something?", Float) = 0 // Here the property name IS relevant
 
 //-------------------------------
 //-- #SHADOW CASTING ------------
