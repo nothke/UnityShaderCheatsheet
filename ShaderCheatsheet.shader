@@ -368,6 +368,11 @@ UnityObjectToWorldNormal(normal); // To convert normals to world space
 
 tex2D(_Tex, float2); // Texture sampling
 
+// #Depth
+float depth = SAMPLE_DEPTH_TEXTURE(_DepthTexture, uv); // Extracts depth from depth texture, the value is non-linear 1 for near plane, 0 for far plane
+Linear01Depth(depth) // Converts raw depth to linear value where 0 is near plane and 1 is far plane
+LinearEyeDepth(depth) // Converts raw depth to world units, 0 being the camera position and 1 unit corresponds to 1 world unit from the camera
+
 // #BUILT-IN VARIABLES
 
 // #Transformations
@@ -432,8 +437,6 @@ unity_FogParams	// float4	Parameters for fog calculation: (density / sqrt(ln(2))
 
 // #LOD
 unity_LODFade	// float4	Level-of-detail fade when using LODGroup. x is fade (0..1), y is fade quantized to 16 levels, z and w unused.
-
-
 
 //-------------------
 //-- #TRANSPARENCY --
