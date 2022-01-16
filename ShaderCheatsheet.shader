@@ -84,8 +84,9 @@ Properties
 
 	// Attiributes:
 	[HideInInspector]
-	[NoScaleOffset] // no texture tiling/offset fields in inspector
-	[Normal] // expects a normal map and adds a "Fix Now" button to convert
+	[MaterialToggle] // Makes a Float parameter act as a bool toggle in inspector. Not to be confused with [Toggle(THINGY)] (see below)
+	[NoScaleOffset] // no texture tiling/offset fields in inspector for samplers
+	[Normal] // expects a normal map and adds a "Fix Now" button if the texture is not set to NormalMap
 	[HDR] // expects an HDR
 	[Gamma] // indicates that a float/vector property is specified as sRGB value in the UI (just like colors are), and possibly needs conversion according to color space used
 	[PerRendererData] // indicates that a texture property will be coming from per-renderer data in the form of a MaterialPropertyBlock. Material inspector changes the texture slot UI for these properties.
